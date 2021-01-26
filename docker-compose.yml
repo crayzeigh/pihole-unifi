@@ -1,0 +1,69 @@
+version: "3"
+
+services:
+  jwilder-proxy:
+    image: budry/jwilder-nginx-proxy-arm
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      DEFAULT_HOST: pihole.domain.tld
+    volumes:
+      - '/var/run/docker.sock:/tmp/docker.sock'
+    restart: always
+
+  pihole:
+  # https://github.com/pi-hole/docker-pi-hole/blob/master/README.md
+    image: pihole/pihole:latest
+    container_name: pihole
+    # For DHCP there is some advanced router configuration. Do not use host mode networking or it will conflict with nginx and the unifi-controller
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "8053:80/tcp"
+      - "9443:443/tcp"
+    environment:
+      ServerIP: ###.###.###.###
+      TZ: 'America/New_York' #Adjust for your timezone
+      PROXY_LOCATION: pihole
+      VIRTUAL_HOST: pihole.domain.tld
+      VIRTUAL_PORT: 80
+      # WEBPASSWORD: 'enter a password and uncomment, otherwise random'
+    # Volumes store your data between container upgrades
+    volumes:
+      - './pihole/etc-pihole/:/etc/pihole/'
+      - './pihole/etc-dnsmasq.d/:/etc/dnsmasq.d/'
+      # run `touch ./var-log/pihole.log` first unless you like errors
+      - './var-log/pihole.log:/var/log/pihole.log'
+    # Recommended but not required (DHCP needs NET_ADMIN)
+    # https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    cap_add:
+      - NET_ADMIN
+    extra_hosts:
+      - 'domain.tld:###.###.###.###'
+      - 'pihole pihole.domain.tld:###.###.###.###'
+      - 'unifi unifi.domain.tld:###.###.###.###'
+    restart: unless-stopped
+
+  unifi-controller:
+    image: ghcr.io/linuxserver/unifi-controller
+    container_name: unifi-controller
+    ports:
+      - "3478:3478/udp"
+      - "10001:10001/udp"
+      - "8080:8080"
+      - "8443:8443"
+      - "1900:1900/udp"
+      - "8843:8843"
+      - "8880:8880"
+      - "6789:6789"
+      - "5541:5541"
+    environment:
+      PROXY_LOCATION: unifi
+      VIRTUAL_HOST: unifi.domain.tld
+      VIRTUAL_PORT: 8443
+      VIRTUAL_PROTO: https
+    volumes:
+      - './unifi/config:/config'
+    restart: unless-stopped
