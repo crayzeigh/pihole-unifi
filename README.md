@@ -1,5 +1,4 @@
 ## Pi-Hole and UniFi with a dynamic Nginx Proxy
-----
 This is a small repo containing a handful of files that can be edited and copied to setup a raspberry pi as both a Unifi controller and PiHole DNS server. You'll want to edit these files to match your personal needs, but compiling them here hopefully means you won't have to search the internet and write them all by scratch yourself.
 
 Details on how this all came to be can be found on my blog:
@@ -7,7 +6,6 @@ Details on how this all came to be can be found on my blog:
 * [Details on automatic updates](https://crayzeigh.com/automated-docker-image-package-updates-on-rasberry-pi)
 
 ## Docker Image Setup
-----
 Mainly you'll want to copy `docker-compose.yml` to wherever you want to house your docker configs, permanent files and logs. You can choose to store your permanent data elsewhere, but the aim was always dead simple for home setup so I wouldn't have to track down configs or do complicated resets if anything goes wrong. The file is annotated with areas you'll need to update with your personal preferences. Notes for each service below:
 
 ### jwilder-proxy
@@ -38,7 +36,6 @@ Mainly you'll want to copy `docker-compose.yml` to wherever you want to house yo
 - **restart**: Also like above, I have this restarting automatically unless I explicitly down this container, do what makes the most sense for you.
 
 ## Automatic Updates
-----
 Since the goal is dead-simple operations and replacable containers, updates are handled simply by checking for changes to the existing containers, downloading new images and replacing the running containers updated ones. The `docker-updates.sh` is written to automate this and let you know when it replaces a container while minimizing disk writes. Consequently all logging is completed in a temporary string then sent off via email, never writing to disk.
 
 ### Requirements
